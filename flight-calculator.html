@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sun PhuQuoc Airways · Multi-Route Flight Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0A2540;
+  --ink-2: #2F5A78;
+  --slate: #5D6F80;
+  --gold: #E8A93A;
+  --gold-deep: #B87F1F;
+  --gold-soft: #F5DFA8;
+  --cream: #FAF6EF;
+  --cream-2: #F0E9DA;
+  --rule: #D9CFB8;
+  --rule-2: #E8DFC9;
+  --white: #FFFFFF;
+  --danger: #A63A3A;
+  --p0: #E8A93A;  --p0-deep: #B87F1F;
+  --p1: #C97B2E;  --p1-deep: #8B4E15;
+  --p2: #F0C15E;  --p2-deep: #C89E38;
+  --p3: #7A9BB8;  --p3-deep: #4E708F;
+  --p4: #D9982E;  --p4-deep: #A0700D;
+  --p5: #A66A1D;  --p5-deep: #6B4310;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── HEADER ─────────────────────────────── */
+.header {
+  border-bottom: 1px solid var(--rule);
+  background: var(--white);
+}
+.header-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #F6C765, var(--gold) 55%, var(--gold-deep));
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  font-size: 16px;
+  box-shadow: 0 0 0 3px var(--cream-2);
+}
+.brand-text { display: flex; flex-direction: column; }
+.brand-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.brand-sub {
+  font-size: 11px;
+  color: var(--slate);
+  letter-spacing: 0.02em;
+}
+.header-meta {
+  font-size: 12px;
+  color: var(--slate);
+  text-align: right;
+}
+.header-meta strong { color: var(--ink); font-weight: 500; }
+
+/* ─── LAYOUT ─────────────────────────────── */
+.app { max-width: 1320px; margin: 0 auto; padding: 44px 32px 80px; }
+
+.title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 36px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.page-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 44px;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  color: var(--ink);
+  max-width: 720px;
+}
+.page-title em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold-deep);
+}
+.page-sub {
+  color: var(--slate);
+  font-size: 14px;
+  max-width: 380px;
+  line-height: 1.55;
+  padding-bottom: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* ─── PANEL ─────────────────────────────── */
+.panel {
+  background: var(--white);
+  border: 1px solid var(--rule);
+  padding: 28px 32px;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule-2);
+}
+.panel-heading h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.panel-heading .count-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold-deep);
+  letter-spacing: 0.05em;
+  margin-left: auto;
+}
+
+/* ─── ROUTE LIST / ACCORDION ─────────────────────── */
+.route-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.route-card {
+  border: 1px solid var(--rule);
+  background: var(--white);
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.route-card.expanded {
+  box-shadow: 0 2px 12px rgba(10, 37, 64, 0.06);
+  border-color: var(--ink);
+}
+
+.route-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  gap: 14px;
+  cursor: pointer;
+  background: var(--white);
+  transition: background 0.15s;
+  user-select: none;
+}
+.route-header:hover { background: var(--cream); }
+.route-card.expanded .route-header {
+  background: var(--ink);
+  color: var(--cream);
+}
+.route-card.expanded .route-header:hover {
+  background: var(--ink-2);
+}
+
+.route-chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--slate);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.route-card.expanded .route-chevron {
+  transform: rotate(90deg);
+  color: var(--gold);
+}
+
+.route-badge {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--white);
+  background: var(--ink);
+  padding: 5px 12px;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  border-radius: 0;
+}
+.route-card.expanded .route-badge {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.route-header-body {
+  flex: 1;
+  min-width: 0;
+}
+.route-title {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.route-card.expanded .route-title { color: var(--cream); }
+.route-title .route-code {
+  font-family: 'Fraunces', serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+.route-title .route-code.empty {
+  color: var(--rule);
+  font-style: italic;
+  font-size: 15px;
+}
+.route-card.expanded .route-title .route-code.empty { color: rgba(250,246,239,0.4); }
+.route-title .route-arrow { color: var(--gold-deep); }
+.route-card.expanded .route-title .route-arrow { color: var(--gold); }
+.route-title .route-name-inline {
+  font-size: 13px;
+  color: var(--slate);
+  font-style: italic;
+  font-weight: 400;
+}
+.route-card.expanded .route-title .route-name-inline { color: rgba(250,246,239,0.75); }
+
+.route-summary-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--slate);
+  line-height: 1.4;
+}
+.route-card.expanded .route-summary-meta { color: rgba(250,246,239,0.7); }
+.route-summary-meta strong { color: var(--ink); font-weight: 500; }
+.route-card.expanded .route-summary-meta strong { color: var(--gold); }
+.route-summary-meta .dot { margin: 0 6px; opacity: 0.5; }
+.route-summary-meta .muted { font-style: italic; }
+
+.route-delete {
+  background: transparent;
+  border: 1px solid var(--rule);
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  color: var(--slate);
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+  padding-bottom: 2px;
+  border-radius: 0;
+}
+.route-card.expanded .route-delete {
+  border-color: rgba(250,246,239,0.3);
+  color: rgba(250,246,239,0.7);
+}
+.route-delete:hover:not(:disabled) {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+}
+.route-delete:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.route-body {
+  padding: 26px 22px 22px;
+  border-top: 1px solid var(--rule);
+  background: var(--white);
+}
+
+.route-section {
+  margin-bottom: 26px;
+}
+.route-section:last-child { margin-bottom: 0; }
+.route-section-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold-deep);
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.route-section-title .num {
+  background: var(--ink);
+  color: var(--gold);
+  padding: 2px 7px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+/* ─── ADD ROUTE BUTTON ─────────────── */
+.btn-add-route {
+  width: 100%;
+  padding: 16px;
+  border: 1.5px dashed var(--rule);
+  background: transparent;
+  color: var(--slate);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 12px;
+  border-radius: 0;
+}
+.btn-add-route:hover {
+  border-color: var(--ink);
+  border-style: solid;
+  color: var(--ink);
+  background: var(--cream);
+}
+.btn-add-route .plus {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--gold-deep);
+  margin-right: 6px;
+  font-weight: 500;
+}
+
+/* ─── FIELDS ─────────────────────────────── */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.field-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 640px) {
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-size: 12px;
+  color: var(--slate);
+  font-weight: 500;
+}
+.field input, .field select {
+  border: 1px solid var(--rule);
+  padding: 10px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  border-radius: 0;
+  width: 100%;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}
+.field input.airport-code {
+  text-transform: uppercase;
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+}
+.field-hint {
+  font-size: 11px;
+  color: var(--slate);
+  font-style: italic;
+}
+
+/* Route preview inside route body */
+.route-preview {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--cream);
+  border: 1px dashed var(--rule);
+}
+.route-preview .code {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  min-width: 50px;
+}
+.route-preview .code.dim { color: var(--rule); }
+.route-preview .arrow { color: var(--gold-deep); font-size: 16px; }
+.route-preview .meta {
+  font-size: 12px;
+  color: var(--slate);
+  margin-left: auto;
+  text-align: right;
+  line-height: 1.4;
+}
+.route-preview .meta strong { color: var(--ink); font-weight: 500; }
+
+/* ─── PHASE CARDS (inside route) ─────────────── */
+.phase-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.phase-card {
+  border: 1px solid var(--rule);
+  background: var(--white);
+  overflow: hidden;
+  position: relative;
+}
+.phase-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--phase-color, var(--gold));
+}
+.phase-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px 12px 20px;
+  background: var(--cream);
+  border-bottom: 1px solid var(--rule);
+  gap: 12px;
+}
+.phase-badge {
+  font-family: 'Fraunces', serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--white);
+  background: var(--phase-color, var(--ink));
+  padding: 3px 10px;
+  min-width: 48px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.phase-summary {
+  flex: 1;
+  font-size: 12px;
+  color: var(--slate);
+  line-height: 1.5;
+  min-width: 0;
+}
+.phase-summary .phase-name-line {
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 1px;
+}
+.phase-summary strong { color: var(--ink); font-weight: 500; }
+.phase-summary .muted { color: var(--slate); font-style: italic; }
+.phase-delete {
+  background: transparent;
+  border: 1px solid var(--rule);
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  color: var(--slate);
+  font-size: 16px;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+  border-radius: 0;
+  flex-shrink: 0;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+.phase-delete:hover:not(:disabled) {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+}
+.phase-delete:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.phase-body { padding: 18px; }
+.phase-body > .field-row,
+.phase-body > .field { margin-bottom: 16px; }
+.phase-body > .field:last-child,
+.phase-body > .field-row:last-child { margin-bottom: 0; }
+
+.btn-add-phase {
+  width: 100%;
+  padding: 12px;
+  border: 1px dashed var(--rule);
+  background: transparent;
+  color: var(--slate);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 12px;
+  border-radius: 0;
+}
+.btn-add-phase:hover {
+  border-color: var(--ink);
+  border-style: solid;
+  color: var(--ink);
+  background: var(--cream);
+}
+.btn-add-phase .plus {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  color: var(--gold-deep);
+  margin-right: 4px;
+  font-weight: 500;
+}
+
+/* ─── DAY TOGGLES ─────────────── */
+.day-list { display: flex; flex-direction: column; }
+.day-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule-2);
+}
+.day-row:last-child { border-bottom: 0; }
+.day-check {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--ink);
+  background: var(--white);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.day-check.checked { background: var(--ink); }
+.day-check.checked::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border-left: 1.8px solid var(--gold);
+  border-bottom: 1.8px solid var(--gold);
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+.day-info { display: flex; align-items: baseline; gap: 10px; }
+.day-name {
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.day-name.dim { color: var(--slate); font-weight: 400; }
+.day-code {
+  font-size: 10px;
+  color: var(--slate);
+  letter-spacing: 0.03em;
+}
+.freq-control { display: flex; align-items: center; gap: 4px; }
+.freq-control.dim { opacity: 0.35; pointer-events: none; }
+.freq-btn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--rule);
+  background: var(--white);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+  user-select: none;
+}
+.freq-btn:hover:not(:disabled) { border-color: var(--ink); background: var(--cream); }
+.freq-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.freq-value {
+  min-width: 36px;
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.freq-suffix {
+  font-size: 11px;
+  color: var(--slate);
+  margin-left: 6px;
+  min-width: 60px;
+}
+
+/* ─── ACTIONS ─────────────── */
+.actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule-2);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s;
+  border-radius: 0;
+}
+.btn-primary { background: var(--ink); color: var(--cream); }
+.btn-primary:hover { background: var(--ink-2); }
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+.btn-secondary:hover { border-color: var(--ink); background: var(--cream); }
+
+.err-msg {
+  color: var(--danger);
+  font-size: 13px;
+  margin-left: auto;
+  font-style: italic;
+}
+
+/* ─── RESULT PANEL ─────────────────────── */
+.result-panel {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 36px 32px;
+  position: sticky;
+  top: 20px;
+  background-image:
+    radial-gradient(circle at 90% -10%, rgba(232, 169, 58, 0.15), transparent 50%),
+    radial-gradient(circle at -20% 120%, rgba(232, 169, 58, 0.08), transparent 40%);
+}
+.result-eyebrow {
+  font-size: 11px;
+  color: var(--gold);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.result-eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: var(--gold);
+}
+.result-number {
+  font-family: 'Fraunces', serif;
+  font-size: 108px;
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  margin: 4px 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+.result-number.placeholder {
+  color: rgba(250, 246, 239, 0.25);
+  font-style: italic;
+  font-weight: 400;
+}
+.result-unit {
+  font-size: 13px;
+  color: var(--cream-2);
+  opacity: 0.7;
+  margin-bottom: 26px;
+  font-style: italic;
+  font-family: 'Fraunces', serif;
+}
+.result-context {
+  padding-top: 22px;
+  border-top: 1px solid rgba(232, 169, 58, 0.25);
+  font-size: 13px;
+  color: var(--cream-2);
+  line-height: 1.65;
+}
+.result-context .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  gap: 12px;
+}
+.result-context .label { color: rgba(250, 246, 239, 0.7); }
+.result-context .value {
+  color: var(--cream);
+  font-family: 'Fraunces', serif;
+  font-variant-numeric: tabular-nums;
+}
+.result-context .value strong {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.result-routes {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(232, 169, 58, 0.25);
+}
+.result-routes-title {
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.mini-route-list { display: flex; flex-direction: column; gap: 12px; }
+.mini-route {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mini-route-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.mini-route-code {
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  color: var(--cream);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.mini-route-code .muted {
+  color: rgba(250, 246, 239, 0.5);
+  font-style: italic;
+  font-size: 12px;
+  margin-left: 6px;
+}
+.mini-route-val {
+  font-family: 'Fraunces', serif;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: 15px;
+}
+.mini-route-bar {
+  height: 4px;
+  background: rgba(250, 246, 239, 0.08);
+  overflow: hidden;
+}
+.mini-route-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.5s ease-out;
+}
+
+/* ─── TABS ─────────────────────────────── */
+.tabs-section {
+  margin-top: 40px;
+  background: var(--white);
+  border: 1px solid var(--rule);
+}
+.tab-headers {
+  display: flex;
+  border-bottom: 1px solid var(--rule);
+  padding: 0 8px;
+  overflow-x: auto;
+}
+.tab-header {
+  padding: 18px 22px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--slate);
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+  background: none;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  font-family: 'Inter', sans-serif;
+}
+.tab-header:hover { color: var(--ink); }
+.tab-header.active {
+  color: var(--ink);
+  border-bottom-color: var(--gold);
+}
+
+.tab-body { padding: 36px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── CALC TAB ─────────────── */
+.calc-intro {
+  color: var(--slate);
+  font-size: 14px;
+  margin-bottom: 24px;
+  max-width: 720px;
+  line-height: 1.65;
+}
+.calc-intro strong { color: var(--ink); font-weight: 500; }
+
+.calc-formula {
+  background: var(--cream);
+  border-left: 3px solid var(--gold);
+  padding: 20px 26px;
+  margin-bottom: 40px;
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.85;
+  font-style: italic;
+}
+.calc-formula .op { color: var(--gold-deep); font-style: normal; margin: 0 4px; }
+.calc-formula .var { color: var(--ink-2); font-style: normal; }
+.calc-formula .num-inline {
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-deep);
+  font-weight: 500;
+  font-style: normal;
+}
+
+.calc-route-block + .calc-route-block {
+  margin-top: 44px;
+  padding-top: 44px;
+  border-top: 2px solid var(--ink);
+}
+.calc-route-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+.calc-route-badge {
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--white);
+  background: var(--ink);
+  padding: 6px 14px;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.calc-route-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.calc-route-title .name-inline {
+  color: var(--slate);
+  font-style: italic;
+  font-size: 15px;
+  font-weight: 400;
+}
+.calc-route-count {
+  margin-left: auto;
+  font-family: 'Fraunces', serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-deep);
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.calc-phase-block + .calc-phase-block {
+  margin-top: 30px;
+  padding-top: 26px;
+  border-top: 1px solid var(--rule-2);
+}
+.calc-phase-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.calc-phase-badge {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--phase-color);
+  padding: 3px 10px;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+.calc-phase-name {
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.calc-phase-name .muted {
+  color: var(--slate);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 14px;
+}
+.calc-phase-count {
+  margin-left: auto;
+  font-family: 'Fraunces', serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--phase-color);
+  font-size: 18px;
+  font-weight: 500;
+}
+.calc-phase-dates {
+  font-size: 12px;
+  color: var(--slate);
+  margin-bottom: 12px;
+}
+
+.calc-phase-formula {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  color: var(--ink);
+  padding: 10px 14px;
+  background: var(--cream);
+  margin-bottom: 12px;
+  border-left: 2px solid var(--phase-color);
+  font-style: italic;
+}
+.calc-phase-formula .op {
+  color: var(--phase-color);
+  font-style: normal;
+  margin: 0 4px;
+  font-weight: 500;
+}
+.calc-phase-formula .num { font-variant-numeric: tabular-nums; font-style: normal; }
+
+.calc-table-wrap { overflow-x: auto; }
+.calc-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 480px;
+}
+.calc-table th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1.5px solid var(--ink);
+  font-size: 10px;
+  color: var(--slate);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.calc-table th.num, .calc-table td.num { text-align: right; }
+.calc-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rule-2);
+  font-size: 13px;
+  color: var(--ink);
+}
+.calc-table tr:last-child td { border-bottom: 0; }
+.calc-table td.num {
+  font-family: 'Fraunces', serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
+.calc-table td.day-cell-label { font-weight: 500; }
+.calc-table td.formula-cell {
+  color: var(--slate);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+}
+.calc-table tfoot td {
+  border-bottom: none;
+  border-top: 1.5px solid var(--ink);
+  font-weight: 600;
+  padding-top: 12px;
+}
+.calc-table tfoot td.num {
+  font-size: 16px;
+  color: var(--phase-color);
+}
+
+.calc-route-subtotal {
+  margin-top: 24px;
+  padding: 16px 22px;
+  background: var(--cream);
+  border-left: 3px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.calc-route-subtotal-label {
+  font-size: 12px;
+  color: var(--slate);
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.calc-route-subtotal-formula {
+  color: var(--slate);
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-style: italic;
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.calc-route-subtotal-formula .op { color: var(--gold-deep); font-style: normal; margin: 0 3px; }
+.calc-route-subtotal-value {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.grand-total-block {
+  margin-top: 50px;
+  padding: 30px 32px;
+  background: var(--ink);
+  color: var(--cream);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  background-image:
+    radial-gradient(circle at 90% -10%, rgba(232, 169, 58, 0.18), transparent 60%);
+}
+.grand-total-label {
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.grand-total-formula {
+  color: var(--cream-2);
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  font-style: italic;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.6;
+}
+.grand-total-formula .op { color: var(--gold); font-style: normal; margin: 0 3px; }
+.grand-total-value {
+  font-family: 'Fraunces', serif;
+  font-size: 60px;
+  font-weight: 400;
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+/* ─── CALENDAR TAB ─────────────── */
+.calendar-intro {
+  color: var(--slate);
+  font-size: 13px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.calendar-route-block + .calendar-route-block {
+  margin-top: 44px;
+  padding-top: 44px;
+  border-top: 2px solid var(--ink);
+}
+.calendar-route-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.calendar-route-head .calc-route-badge {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+.calendar-route-head .calc-route-title {
+  font-size: 18px;
+}
+.calendar-route-head .calc-route-count {
+  font-size: 20px;
+}
+
+.phase-legend {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--slate);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule-2);
+}
+.phase-legend-item { display: flex; align-items: center; gap: 8px; }
+.phase-legend-chip {
+  width: 14px;
+  height: 14px;
+  background: var(--phase-color);
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+.phase-legend-item strong { color: var(--ink); font-weight: 500; }
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+.month {
+  border: 1px solid var(--rule);
+  padding: 16px;
+  background: var(--white);
+}
+.month-title {
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 500;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.month-title-count {
+  font-size: 10px;
+  color: var(--gold-deep);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.month-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.dow-label {
+  font-size: 10px;
+  color: var(--slate);
+  text-align: center;
+  padding: 3px 0;
+  font-weight: 500;
+}
+.day-cell {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: var(--rule);
+  font-variant-numeric: tabular-nums;
+  position: relative;
+  border: 1px solid transparent;
+}
+.day-cell.in-range { color: var(--slate); background: var(--cream); }
+.day-cell.has-flight {
+  background: var(--phase-color, var(--gold));
+  color: var(--white);
+  font-weight: 600;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+.day-cell .freq-badge {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 8px;
+  color: var(--ink);
+  font-weight: 700;
+  background: var(--white);
+  padding: 0 3px;
+  border-radius: 2px;
+  line-height: 1.4;
+}
+
+/* ─── EMPTY STATE ─────────────── */
+.empty {
+  padding: 80px 32px;
+  text-align: center;
+  color: var(--slate);
+}
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 16px;
+  color: var(--rule);
+}
+.empty-text {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--slate);
+}
+
+/* ─── RESPONSIVE ─────────────── */
+@media (max-width: 700px) {
+  .header-inner { padding: 14px 20px; }
+  .app { padding: 28px 20px 60px; }
+  .page-title { font-size: 30px; }
+  .panel { padding: 22px; }
+  .result-panel { padding: 26px 22px; position: static; }
+  .result-number { font-size: 76px; }
+  .tab-body { padding: 22px; }
+  .tab-headers { padding: 0; }
+  .tab-header { padding: 14px 16px; font-size: 13px; }
+  .header-meta { display: none; }
+  .grand-total-value { font-size: 42px; }
+  .route-body { padding: 18px 14px; }
+  .route-header { padding: 12px 14px; gap: 10px; }
+  .route-badge { min-width: 50px; padding: 4px 8px; font-size: 12px; }
+  .route-title { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">✈</div>
+      <div class="brand-text">
+        <div class="brand-name">AIRLINES OPERATIONS</div>
+        <div class="brand-sub">B2B COMMERCIAL PLANNING</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div><strong>Multi-Route Flight Calculator</strong></div>
+      <div id="today-label"></div>
+    </div>
+  </div>
+</header>
+
+<main class="app">
+
+  <div class="title-row">
+    <h1 class="page-title">FLIGHT CALCULATOR</h1>
+    <p class="page-sub">Manage multiple flight routes at once, each with its own operating phases, schedules, and flexible frequencies. Click a route card to expand or collapse it.</p>
+  </div>
+
+  <div class="grid">
+    <!-- ================= INPUT PANEL ================= -->
+    <div class="panel">
+      <div class="panel-heading">
+        <h2>Flight routes</h2>
+        <span class="count-badge" id="route-count-badge">0 ROUTES</span>
+      </div>
+
+      <div class="route-list" id="route-list"></div>
+
+      <button class="btn-add-route" id="btn-add-route">
+        <span class="plus">+</span> Add new route
+      </button>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-calc">Calculate total flights</button>
+        <button class="btn btn-secondary" id="btn-reset">Clear all</button>
+        <span class="err-msg" id="err-msg"></span>
+      </div>
+    </div>
+
+    <!-- ================= RESULT PANEL ================= -->
+    <aside class="result-panel">
+      <div class="result-eyebrow">TOTAL NETWORK FLIGHTS</div>
+      <div class="result-number placeholder" id="result-number">—</div>
+      <div class="result-unit" id="result-unit">Not calculated</div>
+
+      <div class="result-context" id="result-context">
+        <div class="row">
+          <span class="label">Operating routes</span>
+          <span class="value" id="ctx-routes">—</span>
+        </div>
+        <div class="row">
+          <span class="label">Total phases</span>
+          <span class="value" id="ctx-phases">—</span>
+        </div>
+        <div class="row">
+          <span class="label">Network span</span>
+          <span class="value" id="ctx-duration">—</span>
+        </div>
+      </div>
+
+      <div class="result-routes" id="result-routes" style="display:none">
+        <div class="result-routes-title">BREAKDOWN BY ROUTE</div>
+        <div class="mini-route-list" id="mini-route-list"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ================= TABS ================= -->
+  <section class="tabs-section">
+    <div class="tab-headers">
+      <button class="tab-header active" data-tab="calc">Calculation details</button>
+      <button class="tab-header" data-tab="calendar">Detailed schedule</button>
+    </div>
+
+    <div class="tab-body">
+      <div class="tab-content active" id="tab-calc">
+        <div id="calc-empty" class="empty">
+          <div class="empty-icon">∑</div>
+          <div class="empty-text">Click <em>Calculate total flights</em> to see the detailed analysis</div>
+        </div>
+        <div id="calc-body" style="display:none">
+          <p class="calc-intro">
+            Total network flights = <strong>Σ (flights per route)</strong>. For each route, total flights = <strong>Σ (flights per phase)</strong>, and for each phase, flights = <strong>Σ (occurrences of each weekday × frequency)</strong>. These three layers add up to the final total.
+          </p>
+
+          <div class="calc-formula" id="calc-formula">
+            <span class="var">Network total</span>
+            <span class="op">=</span>
+            <span class="var">Σ Route ᵢ</span>
+            <span class="op">=</span>
+            <span class="var">Σᵢ Σⱼ Phase ᵢⱼ</span>
+          </div>
+
+          <div id="calc-routes-container"></div>
+
+          <div class="grand-total-block">
+            <div>
+              <div class="grand-total-label">Total network flights</div>
+              <div class="grand-total-formula" id="grand-formula">—</div>
+            </div>
+            <div class="grand-total-value" id="grand-value">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-calendar">
+        <div id="calendar-empty" class="empty">
+          <div class="empty-icon">◲</div>
+          <div class="empty-text">Click <em>Calculate total flights</em> to see each route's schedule</div>
+        </div>
+        <div id="calendar-body" style="display:none">
+          <p class="calendar-intro">
+            Each route displays its own schedule, color-coded by phase. The small number in the corner is the frequency per day (shown only when >1).
+          </p>
+          <div id="calendar-routes-container"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ============ CONSTANTS ============
+const DAY_NAMES = {
+  1: { full: 'D1', short: 'MON', en: 'MON' },
+  2: { full: 'D2', short: 'TUE', en: 'TUE' },
+  3: { full: 'D3', short: 'WED', en: 'WED' },
+  4: { full: 'D4', short: 'THU', en: 'THU' },
+  5: { full: 'D5', short: 'FRI', en: 'FRI' },
+  6: { full: 'D6', short: 'SAT', en: 'SAT' },
+  7: { full: 'D7', short: 'SUN', en: 'SUN' }
+};
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const PHASE_COLORS = ['--p0', '--p1', '--p2', '--p3', '--p4', '--p5'];
+
+let routeIdCounter = 0;
+let phaseIdCounter = 0;
+
+// ============ STATE ============
+const state = {
+  routes: []
+};
+
+function createEmptyPhase() {
+  phaseIdCounter += 1;
+  return {
+    id: 'ph' + phaseIdCounter,
+    name: '',
+    startDate: '',
+    endDate: '',
+    days: { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null, 7: null }
+  };
+}
+
+function createEmptyRoute() {
+  routeIdCounter += 1;
+  return {
+    id: 'r' + routeIdCounter,
+    name: '',
+    origin: '',
+    destination: '',
+    departFrom: 'origin',
+    phases: [createEmptyPhase()],
+    isExpanded: true,
+    result: null
+  };
+}
+
+// ============ HELPERS ============
+function toIsoDay(jsDay) { return jsDay === 0 ? 7 : jsDay; }
+function fmtDate(d) {
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  return `${dd}/${mm}/${d.getFullYear()}`;
+}
+function fmtNum(n) { return new Intl.NumberFormat('vi-VN').format(n); }
+function phaseColorVar(idx) { return `var(${PHASE_COLORS[idx % PHASE_COLORS.length]})`; }
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function phaseSummaryText(phase) {
+  const parts = [];
+  if (phase.startDate && phase.endDate) {
+    parts.push(`<strong>${fmtDate(new Date(phase.startDate))} – ${fmtDate(new Date(phase.endDate))}</strong>`);
+  } else {
+    parts.push(`<span class="muted">Dates incomplete</span>`);
+  }
+  const active = Object.entries(phase.days).filter(([, v]) => v !== null);
+  if (active.length === 0) {
+    parts.push(`<span class="muted">no weekdays selected</span>`);
+  } else {
+    const names = active.map(([d, v]) => `${DAY_NAMES[+d].short}${v > 1 ? '×' + v : ''}`).join(', ');
+    const perWeek = active.reduce((s, [, v]) => s + v, 0);
+    parts.push(`<strong>${names}</strong> · ${perWeek}/week`);
+  }
+  return parts.join(' · ');
+}
+
+function routeCanCompute(route) {
+  if (!route.origin || !route.destination || route.origin === route.destination) return false;
+  if (route.phases.length === 0) return false;
+  return route.phases.every(p => {
+    if (!p.startDate || !p.endDate) return false;
+    const s = new Date(p.startDate);
+    const e = new Date(p.endDate);
+    if (s > e) return false;
+    return Object.values(p.days).some(v => v !== null);
+  });
+}
+
+// ============ ROUTE LIST RENDER ============
+function renderRouteList() {
+  const container = document.getElementById('route-list');
+  container.innerHTML = '';
+  state.routes.forEach((route, idx) => {
+    container.appendChild(createRouteCard(route, idx));
+  });
+  updateRouteCountBadge();
+}
+
+function updateRouteCountBadge() {
+  const el = document.getElementById('route-count-badge');
+  const n = state.routes.length;
+  el.textContent = `${n} ROUTES`;
+}
+
+function createRouteCard(route, idx) {
+  const el = document.createElement('div');
+  el.className = 'route-card' + (route.isExpanded ? ' expanded' : '');
+  el.dataset.routeId = route.id;
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'route-header';
+  header.innerHTML = routeHeaderHTML(route, idx);
+  el.appendChild(header);
+
+  // Header click: toggle (except on delete button)
+  header.addEventListener('click', (e) => {
+    if (e.target.closest('.route-delete')) return;
+    route.isExpanded = !route.isExpanded;
+    renderRouteList();
+  });
+
+  // Delete button
+  header.querySelector('.route-delete').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (state.routes.length <= 1) return;
+    state.routes = state.routes.filter(r => r.id !== route.id);
+    renderRouteList();
+  });
+
+  // Body (only rendered when expanded)
+  if (route.isExpanded) {
+    const body = document.createElement('div');
+    body.className = 'route-body';
+    body.appendChild(buildRouteBody(route, idx));
+    el.appendChild(body);
+  }
+
+  return el;
+}
+
+function routeHeaderHTML(route, idx) {
+  const fromCode = route.departFrom === 'origin' ? route.origin : route.destination;
+  const toCode = route.departFrom === 'origin' ? route.destination : route.origin;
+  const hasRoute = fromCode && toCode;
+
+  let title = '';
+  if (hasRoute) {
+    title = `<span class="route-code">${esc(fromCode)}</span> <span class="route-arrow">→</span> <span class="route-code">${esc(toCode)}</span>`;
+  } else {
+    title = `<span class="route-code empty">Route not entered</span>`;
+  }
+  const nameInline = route.name ? `<span class="route-name-inline">· ${esc(route.name)}</span>` : '';
+
+  // Summary meta
+  const summaryParts = [];
+  const phaseCount = route.phases.length;
+  summaryParts.push(`<strong>${phaseCount}</strong> phases`);
+  if (route.result) {
+    summaryParts.push(`<strong>${fmtNum(route.result.totalFlights)}</strong> flights`);
+    summaryParts.push(`${fmtDate(route.result.overallStart)} – ${fmtDate(route.result.overallEnd)}`);
+  } else if (routeCanCompute(route)) {
+    summaryParts.push(`<span class="muted">ready to calculate</span>`);
+  } else {
+    summaryParts.push(`<span class="muted">information incomplete</span>`);
+  }
+
+  return `
+    <svg class="route-chevron" viewBox="0 0 14 14">
+      <path d="M5 3 L10 7 L5 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="route-badge">ROUTE ${idx + 1}</span>
+    <div class="route-header-body">
+      <div class="route-title">${title} ${nameInline}</div>
+      <div class="route-summary-meta">${summaryParts.join('<span class="dot">·</span>')}</div>
+    </div>
+    <button class="route-delete" title="Delete route" ${state.routes.length <= 1 ? 'disabled' : ''}>×</button>
+  `;
+}
+
+// ============ ROUTE BODY ============
+function buildRouteBody(route, routeIdx) {
+  const wrapper = document.createElement('div');
+
+  // ── Section 1: Route info ──
+  const infoSection = document.createElement('div');
+  infoSection.className = 'route-section';
+  infoSection.innerHTML = `
+    <div class="route-section-title"><span class="num">01</span> Route information</div>
+    <div class="field" style="margin-bottom: 14px;">
+      <label>Route name (optional)</label>
+      <input type="text" class="route-name-input" placeholder="e.g. SGN – Moscow main route" value="${esc(route.name)}">
+    </div>
+    <div class="field-row-3">
+      <div class="field">
+        <label>Origin</label>
+        <input type="text" class="route-origin-input airport-code" maxlength="3" placeholder="SGN" value="${esc(route.origin)}">
+        <span class="field-hint">3-letter IATA code</span>
+      </div>
+      <div class="field">
+        <label>Destination</label>
+        <input type="text" class="route-dest-input airport-code" maxlength="3" placeholder="SVO" value="${esc(route.destination)}">
+        <span class="field-hint">3-letter IATA code</span>
+      </div>
+      <div class="field">
+        <label>Depart from</label>
+        <select class="route-departfrom-select">
+          ${routeDepartFromOptions(route)}
+        </select>
+        <span class="field-hint">Flight direction</span>
+      </div>
+    </div>
+    <div class="route-preview">
+      ${routePreviewInnerHTML(route)}
+    </div>
+  `;
+
+  // Attach event listeners
+  const nameInput = infoSection.querySelector('.route-name-input');
+  nameInput.addEventListener('input', (e) => {
+    route.name = e.target.value;
+    updateRouteHeaderInPlace(route, routeIdx);
+  });
+
+  const originInput = infoSection.querySelector('.route-origin-input');
+  originInput.addEventListener('input', (e) => {
+    route.origin = e.target.value.toUpperCase();
+    e.target.value = route.origin;
+    updateDepartFromOptions(infoSection, route);
+    updateRoutePreviewInPlace(infoSection, route);
+    updateRouteHeaderInPlace(route, routeIdx);
+  });
+
+  const destInput = infoSection.querySelector('.route-dest-input');
+  destInput.addEventListener('input', (e) => {
+    route.destination = e.target.value.toUpperCase();
+    e.target.value = route.destination;
+    updateDepartFromOptions(infoSection, route);
+    updateRoutePreviewInPlace(infoSection, route);
+    updateRouteHeaderInPlace(route, routeIdx);
+  });
+
+  const departSelect = infoSection.querySelector('.route-departfrom-select');
+  departSelect.addEventListener('change', (e) => {
+    route.departFrom = e.target.value;
+    updateRoutePreviewInPlace(infoSection, route);
+    updateRouteHeaderInPlace(route, routeIdx);
+  });
+
+  wrapper.appendChild(infoSection);
+
+  // ── Section 2: Phases ──
+  const phaseSection = document.createElement('div');
+  phaseSection.className = 'route-section';
+  phaseSection.innerHTML = `
+    <div class="route-section-title"><span class="num">02</span> Operating phases</div>
+    <div class="phase-list"></div>
+    <button class="btn-add-phase">
+      <span class="plus">+</span> Add new phase
+    </button>
+  `;
+
+  const phaseList = phaseSection.querySelector('.phase-list');
+  route.phases.forEach((phase, pidx) => {
+    phaseList.appendChild(createPhaseCard(route, phase, pidx, routeIdx));
+  });
+
+  phaseSection.querySelector('.btn-add-phase').addEventListener('click', () => {
+    route.phases.push(createEmptyPhase());
+    renderRouteList();
+  });
+
+  wrapper.appendChild(phaseSection);
+
+  return wrapper;
+}
+
+function routeDepartFromOptions(route) {
+  if (route.origin && route.destination) {
+    return `
+      <option value="origin" ${route.departFrom === 'origin' ? 'selected' : ''}>${esc(route.origin)} (Origin)</option>
+      <option value="destination" ${route.departFrom === 'destination' ? 'selected' : ''}>${esc(route.destination)} (Destination)</option>
+    `;
+  }
+  return `<option value="origin">— Origin —</option>`;
+}
+
+function updateDepartFromOptions(bodyEl, route) {
+  const select = bodyEl.querySelector('.route-departfrom-select');
+  select.innerHTML = routeDepartFromOptions(route);
+  if (route.origin && route.destination) select.value = route.departFrom;
+}
+
+function routePreviewInnerHTML(route) {
+  const fromCode = route.departFrom === 'origin' ? route.origin : route.destination;
+  const toCode = route.departFrom === 'origin' ? route.destination : route.origin;
+  const hasBoth = route.origin && route.destination;
+  return `
+    <span class="code ${fromCode ? '' : 'dim'}">${fromCode || '···'}</span>
+    <span class="arrow">→</span>
+    <span class="code ${toCode ? '' : 'dim'}">${toCode || '···'}</span>
+    <div class="meta">
+      ${hasBoth
+        ? `Route <strong>${esc(route.origin)}–${esc(route.destination)}</strong> · Calculating <strong>${route.departFrom === 'origin' ? 'outbound' : 'return'}</strong>`
+        : 'Enter airport codes to preview the route'}
+    </div>
+  `;
+}
+
+function updateRoutePreviewInPlace(bodyEl, route) {
+  const preview = bodyEl.querySelector('.route-preview');
+  preview.innerHTML = routePreviewInnerHTML(route);
+}
+
+function updateRouteHeaderInPlace(route, routeIdx) {
+  const routeCard = document.querySelector(`[data-route-id="${route.id}"]`);
+  if (!routeCard) return;
+  const header = routeCard.querySelector('.route-header');
+  header.innerHTML = routeHeaderHTML(route, routeIdx);
+  // Re-attach delete listener (header was replaced)
+  header.querySelector('.route-delete').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (state.routes.length <= 1) return;
+    state.routes = state.routes.filter(r => r.id !== route.id);
+    renderRouteList();
+  });
+}
+
+// ============ PHASE CARDS ============
+function createPhaseCard(route, phase, pidx, routeIdx) {
+  const el = document.createElement('div');
+  el.className = 'phase-card';
+  el.dataset.phaseId = phase.id;
+  el.style.setProperty('--phase-color', phaseColorVar(pidx));
+
+  const displayName = phase.name || `Phase ${pidx + 1}`;
+
+  el.innerHTML = `
+    <div class="phase-header">
+      <span class="phase-badge">PHASE ${pidx + 1}</span>
+      <div class="phase-summary">
+        <div class="phase-name-line">${esc(displayName)}</div>
+        <div class="phase-summary-meta">${phaseSummaryText(phase)}</div>
+      </div>
+      <button class="phase-delete" title="Delete phase" ${route.phases.length <= 1 ? 'disabled' : ''}>×</button>
+    </div>
+    <div class="phase-body">
+      <div class="field">
+        <label>Phase name (optional)</label>
+        <input type="text" class="phase-name-input" placeholder="e.g. Summer peak season" value="${esc(phase.name)}">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Start date</label>
+          <input type="date" class="phase-start-input" value="${phase.startDate}">
+        </div>
+        <div class="field">
+          <label>End date</label>
+          <input type="date" class="phase-end-input" value="${phase.endDate}">
+        </div>
+      </div>
+      <div class="day-list">
+        ${[1,2,3,4,5,6,7].map(d => {
+          const isSelected = phase.days[d] !== null;
+          const freq = phase.days[d] || 1;
+          return `
+            <div class="day-row" data-day="${d}">
+              <div class="day-check ${isSelected ? 'checked' : ''}" data-day="${d}"></div>
+              <div class="day-info">
+                <span class="day-name ${isSelected ? '' : 'dim'}">${DAY_NAMES[d].full}</span>
+                <span class="day-code">${DAY_NAMES[d].en}</span>
+              </div>
+              <div class="freq-control ${isSelected ? '' : 'dim'}">
+                <button class="freq-btn" data-op="dec" ${freq <= 1 ? 'disabled' : ''}>−</button>
+                <span class="freq-value">${freq}</span>
+                <button class="freq-btn" data-op="inc">+</button>
+                <span class="freq-suffix">flights/day</span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  // Delete phase
+  el.querySelector('.phase-delete').addEventListener('click', () => {
+    if (route.phases.length <= 1) return;
+    route.phases = route.phases.filter(p => p.id !== phase.id);
+    renderRouteList();
+  });
+
+  // Phase name input (update summary in place)
+  el.querySelector('.phase-name-input').addEventListener('input', e => {
+    phase.name = e.target.value;
+    el.querySelector('.phase-name-line').textContent = phase.name || `Phase ${pidx + 1}`;
+  });
+
+  // Date inputs
+  el.querySelector('.phase-start-input').addEventListener('change', e => {
+    phase.startDate = e.target.value;
+    el.querySelector('.phase-summary-meta').innerHTML = phaseSummaryText(phase);
+    updateRouteHeaderInPlace(route, routeIdx);
+  });
+  el.querySelector('.phase-end-input').addEventListener('change', e => {
+    phase.endDate = e.target.value;
+    el.querySelector('.phase-summary-meta').innerHTML = phaseSummaryText(phase);
+    updateRouteHeaderInPlace(route, routeIdx);
+  });
+
+  // Day toggles
+  el.querySelectorAll('.day-check').forEach(check => {
+    check.addEventListener('click', () => {
+      const day = +check.dataset.day;
+      phase.days[day] = phase.days[day] === null ? 1 : null;
+      renderRouteList();
+    });
+  });
+  el.querySelectorAll('.freq-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const day = +btn.closest('.day-row').dataset.day;
+      if (phase.days[day] === null) return;
+      const op = btn.dataset.op;
+      if (op === 'inc') phase.days[day] += 1;
+      else if (op === 'dec' && phase.days[day] > 1) phase.days[day] -= 1;
+      renderRouteList();
+    });
+  });
+
+  return el;
+}
+
+// ============ CALCULATE ============
+function calculatePhase(phase, pidx) {
+  const start = new Date(phase.startDate + 'T00:00:00');
+  const end = new Date(phase.endDate + 'T00:00:00');
+  const byDay = {};
+  for (let d = 1; d <= 7; d++) byDay[d] = { count: 0, freq: phase.days[d], flights: 0 };
+
+  let totalFlights = 0;
+  const flightDates = [];
+  const cursor = new Date(start);
+  while (cursor <= end) {
+    const iso = toIsoDay(cursor.getDay());
+    if (phase.days[iso] !== null) {
+      byDay[iso].count += 1;
+      byDay[iso].flights += phase.days[iso];
+      totalFlights += phase.days[iso];
+      flightDates.push({ date: new Date(cursor), day: iso, freq: phase.days[iso], phaseIdx: pidx });
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  const totalDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  const perWeek = Object.values(phase.days).filter(v => v !== null).reduce((s, v) => s + v, 0);
+  return {
+    idx: pidx, phase,
+    start, end,
+    totalDays, totalWeeks: totalDays / 7,
+    byDay, totalFlights, flightDates, perWeek
+  };
+}
+
+function calculateRoute(route, ridx) {
+  const phaseResults = route.phases.map((p, i) => calculatePhase(p, i));
+  const totalFlights = phaseResults.reduce((s, r) => s + r.totalFlights, 0);
+  const allFlightDates = phaseResults.flatMap(r => r.flightDates);
+  const overallStart = new Date(Math.min(...phaseResults.map(r => r.start.getTime())));
+  const overallEnd = new Date(Math.max(...phaseResults.map(r => r.end.getTime())));
+  const totalOperatingDays = phaseResults.reduce((s, r) => s + r.totalDays, 0);
+  return {
+    idx: ridx, route,
+    phaseResults, totalFlights, allFlightDates,
+    overallStart, overallEnd, totalOperatingDays
+  };
+}
+
+function calculate() {
+  const errEl = document.getElementById('err-msg');
+  errEl.textContent = '';
+
+  if (state.routes.length === 0) {
+    errEl.textContent = 'Please add at least one flight route.';
+    return;
+  }
+
+  // Validate each route
+  for (let i = 0; i < state.routes.length; i++) {
+    const r = state.routes[i];
+    if (!r.origin || !r.destination) {
+      errEl.textContent = `Route ${i + 1}: origin or destination is missing.`;
+      r.isExpanded = true;
+      renderRouteList();
+      return;
+    }
+    if (r.origin === r.destination) {
+      errEl.textContent = `Route ${i + 1}: origin and destination must be different.`;
+      r.isExpanded = true;
+      renderRouteList();
+      return;
+    }
+    if (r.phases.length === 0) {
+      errEl.textContent = `Route ${i + 1}: no phases have been added.`;
+      r.isExpanded = true;
+      renderRouteList();
+      return;
+    }
+    for (let j = 0; j < r.phases.length; j++) {
+      const p = r.phases[j];
+      if (!p.startDate || !p.endDate) {
+        errEl.textContent = `Route ${i + 1} · Phase ${j + 1}: start or end date is missing.`;
+        r.isExpanded = true;
+        renderRouteList();
+        return;
+      }
+      const s = new Date(p.startDate);
+      const e = new Date(p.endDate);
+      if (s > e) {
+        errEl.textContent = `Route ${i + 1} · Phase ${j + 1}: start date must be before end date.`;
+        r.isExpanded = true;
+        renderRouteList();
+        return;
+      }
+      if (Object.values(p.days).every(v => v === null)) {
+        errEl.textContent = `Route ${i + 1} · Phase ${j + 1}: select at least one weekday.`;
+        r.isExpanded = true;
+        renderRouteList();
+        return;
+      }
+    }
+  }
+
+  // Compute
+  const routeResults = state.routes.map((r, i) => calculateRoute(r, i));
+  // Store result on each route for header summary
+  routeResults.forEach(rr => { rr.route.result = rr; });
+
+  const grandTotal = routeResults.reduce((s, r) => s + r.totalFlights, 0);
+  const totalPhases = routeResults.reduce((s, r) => s + r.phaseResults.length, 0);
+  const networkStart = new Date(Math.min(...routeResults.map(r => r.overallStart.getTime())));
+  const networkEnd = new Date(Math.max(...routeResults.map(r => r.overallEnd.getTime())));
+
+  state.aggregate = {
+    routeResults,
+    grandTotal,
+    totalPhases,
+    networkStart,
+    networkEnd
+  };
+
+  renderResult();
+  renderRouteList(); // Refresh headers to show computed totals
+}
+
+// ============ RENDER RESULT (right panel) ============
+function renderResult() {
+  const a = state.aggregate;
+  const numEl = document.getElementById('result-number');
+  const unitEl = document.getElementById('result-unit');
+
+  if (!a) {
+    numEl.textContent = '—';
+    numEl.classList.add('placeholder');
+    unitEl.textContent = 'Not calculated';
+    document.getElementById('ctx-routes').textContent = '—';
+    document.getElementById('ctx-phases').textContent = '—';
+    document.getElementById('ctx-duration').textContent = '—';
+    document.getElementById('result-routes').style.display = 'none';
+    return;
+  }
+
+  numEl.textContent = fmtNum(a.grandTotal);
+  numEl.classList.remove('placeholder');
+  unitEl.textContent = `${a.routeResults.length} routes · ${a.totalPhases} phases · flights`;
+
+  document.getElementById('ctx-routes').innerHTML = `<strong>${a.routeResults.length}</strong> routes`;
+  document.getElementById('ctx-phases').innerHTML = `<strong>${a.totalPhases}</strong> phases`;
+  document.getElementById('ctx-duration').textContent = `${fmtDate(a.networkStart)} – ${fmtDate(a.networkEnd)}`;
+
+  // Mini route list
+  const routesEl = document.getElementById('result-routes');
+  const listEl = document.getElementById('mini-route-list');
+  routesEl.style.display = 'block';
+  const maxFlights = Math.max(...a.routeResults.map(rr => rr.totalFlights));
+  listEl.innerHTML = a.routeResults.map(rr => {
+    const r = rr.route;
+    const fromCode = r.departFrom === 'origin' ? r.origin : r.destination;
+    const toCode = r.departFrom === 'origin' ? r.destination : r.origin;
+    const nameInline = r.name ? `<span class="muted">${esc(r.name)}</span>` : '';
+    const pct = maxFlights > 0 ? (rr.totalFlights / maxFlights) * 100 : 0;
+    return `
+      <div class="mini-route">
+        <div class="mini-route-head">
+          <span class="mini-route-code">${esc(fromCode)} → ${esc(toCode)} ${nameInline}</span>
+          <span class="mini-route-val">${fmtNum(rr.totalFlights)}</span>
+        </div>
+        <div class="mini-route-bar">
+          <div class="mini-route-bar-fill" style="width: ${pct}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  renderCalcTab();
+  renderCalendarTab();
+}
+
+// ============ CALC TAB ============
+function renderCalcTab() {
+  const a = state.aggregate;
+  document.getElementById('calc-empty').style.display = 'none';
+  document.getElementById('calc-body').style.display = 'block';
+
+  // Overall formula
+  const formulaEl = document.getElementById('calc-formula');
+  const parts = a.routeResults.map((rr, i) => `<span class="num-inline">${fmtNum(rr.totalFlights)}</span>`);
+  formulaEl.innerHTML = `
+    <span class="var">Network total</span>
+    <span class="op">=</span>
+    ${parts.join(' <span class="op">+</span> ')}
+    <span class="op">=</span>
+    <span class="num-inline">${fmtNum(a.grandTotal)}</span> flights
+  `;
+
+  // Per-route blocks
+  const container = document.getElementById('calc-routes-container');
+  container.innerHTML = a.routeResults.map(rr => routeCalcBlockHTML(rr)).join('');
+
+  // Grand total
+  const grandParts = a.routeResults.map((rr, i) =>
+    `<span>${fmtNum(rr.totalFlights)}<sub style="font-size: 10px; opacity: 0.7;"> T${i + 1}</sub></span>`
+  );
+  document.getElementById('grand-formula').innerHTML =
+    grandParts.join(' <span class="op">+</span> ') +
+    ` <span class="op">=</span> ${fmtNum(a.grandTotal)} total network flights`;
+  document.getElementById('grand-value').textContent = fmtNum(a.grandTotal);
+}
+
+function routeCalcBlockHTML(rr) {
+  const r = rr.route;
+  const fromCode = r.departFrom === 'origin' ? r.origin : r.destination;
+  const toCode = r.departFrom === 'origin' ? r.destination : r.origin;
+  const nameInline = r.name ? `<span class="name-inline">· ${esc(r.name)}</span>` : '';
+
+  const phaseBlocks = rr.phaseResults.map(pr => phaseCalcBlockHTML(pr)).join('');
+
+  const subtotalFormulaParts = rr.phaseResults.map(pr =>
+    `<span class="num-inline">${fmtNum(pr.totalFlights)}</span>`
+  );
+
+  return `
+    <div class="calc-route-block">
+      <div class="calc-route-head">
+        <span class="calc-route-badge">ROUTE ${rr.idx + 1}</span>
+        <span class="calc-route-title">
+          ${esc(fromCode)} <span style="color: var(--gold-deep)">→</span> ${esc(toCode)}
+          ${nameInline}
+        </span>
+        <span class="calc-route-count">${fmtNum(rr.totalFlights)} flights</span>
+      </div>
+
+      ${phaseBlocks}
+
+      <div class="calc-route-subtotal">
+        <div>
+          <div class="calc-route-subtotal-label">Route ${rr.idx + 1} total</div>
+          <div class="calc-route-subtotal-formula">
+            ${subtotalFormulaParts.join(' <span class="op">+</span> ')}
+            <span class="op">=</span>
+            ${fmtNum(rr.totalFlights)} flights
+          </div>
+        </div>
+        <div class="calc-route-subtotal-value">${fmtNum(rr.totalFlights)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function phaseCalcBlockHTML(pr) {
+  const activeDays = Object.entries(pr.byDay).filter(([, v]) => v.freq !== null);
+  const displayName = pr.phase.name || `Phase ${pr.idx + 1}`;
+
+  const phaseFormulaParts = activeDays.map(([, v]) =>
+    `(<span class="num">${v.count}</span> <span class="op">×</span> <span class="num">${v.freq}</span>)`
+  );
+
+  const rows = activeDays.map(([d, v]) => `
+    <tr>
+      <td class="day-cell-label">${DAY_NAMES[+d].full}</td>
+      <td class="num">${v.count}</td>
+      <td class="num">${v.freq}</td>
+      <td class="formula-cell">${v.count} × ${v.freq}</td>
+      <td class="num">${fmtNum(v.flights)}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="calc-phase-block" style="--phase-color: ${phaseColorVar(pr.idx)}">
+      <div class="calc-phase-head">
+        <span class="calc-phase-badge">PHASE ${pr.idx + 1}</span>
+        <span class="calc-phase-name">${esc(displayName)}</span>
+        <span class="calc-phase-count">${fmtNum(pr.totalFlights)} flights</span>
+      </div>
+      <div class="calc-phase-dates">
+        From ${fmtDate(pr.start)} to ${fmtDate(pr.end)} · ${pr.totalDays} days · ${pr.perWeek} flights/week
+      </div>
+      <div class="calc-phase-formula">
+        ${phaseFormulaParts.join(' <span class="op">+</span> ')}
+        <span class="op">=</span>
+        <span class="num">${fmtNum(pr.totalFlights)}</span> flights
+      </div>
+      <div class="calc-table-wrap">
+        <table class="calc-table">
+          <thead>
+            <tr>
+              <th>Weekday</th>
+              <th class="num">Occurrences</th>
+              <th class="num">Frequency</th>
+              <th>Calculation</th>
+              <th class="num">Flights</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4">Phase total</td>
+              <td class="num">${fmtNum(pr.totalFlights)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// ============ CALENDAR TAB ============
+function renderCalendarTab() {
+  const a = state.aggregate;
+  document.getElementById('calendar-empty').style.display = 'none';
+  document.getElementById('calendar-body').style.display = 'block';
+
+  const container = document.getElementById('calendar-routes-container');
+  container.innerHTML = a.routeResults.map(rr => routeCalendarBlockHTML(rr)).join('');
+}
+
+function routeCalendarBlockHTML(rr) {
+  const r = rr.route;
+  const fromCode = r.departFrom === 'origin' ? r.origin : r.destination;
+  const toCode = r.departFrom === 'origin' ? r.destination : r.origin;
+  const nameInline = r.name ? `<span class="name-inline">· ${esc(r.name)}</span>` : '';
+
+  // Phase legend
+  const legend = rr.phaseResults.map(pr => {
+    const displayName = pr.phase.name || `Phase ${pr.idx + 1}`;
+    return `
+      <div class="phase-legend-item" style="--phase-color: ${phaseColorVar(pr.idx)}">
+        <span class="phase-legend-chip"></span>
+        <span><strong>PHASE ${pr.idx + 1}</strong> · ${esc(displayName)} · ${fmtDate(pr.start)} – ${fmtDate(pr.end)}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Build month map
+  const monthMap = new Map();
+  const c = new Date(rr.overallStart);
+  while (c <= rr.overallEnd) {
+    const key = `${c.getFullYear()}-${c.getMonth()}`;
+    if (!monthMap.has(key)) {
+      monthMap.set(key, {
+        year: c.getFullYear(),
+        month: c.getMonth(),
+        flights: new Map(),
+        inRangeDays: new Set()
+      });
+    }
+    c.setDate(c.getDate() + 1);
+  }
+
+  // Mark in-range days per phase
+  rr.phaseResults.forEach(pr => {
+    const c2 = new Date(pr.start);
+    while (c2 <= pr.end) {
+      const key = `${c2.getFullYear()}-${c2.getMonth()}`;
+      if (monthMap.has(key)) monthMap.get(key).inRangeDays.add(c2.getDate());
+      c2.setDate(c2.getDate() + 1);
+    }
+  });
+
+  // Add flights
+  rr.allFlightDates.forEach(f => {
+    const key = `${f.date.getFullYear()}-${f.date.getMonth()}`;
+    if (monthMap.has(key)) {
+      monthMap.get(key).flights.set(f.date.getDate(), { freq: f.freq, phaseIdx: f.phaseIdx });
+    }
+  });
+
+  const dowLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  const months = Array.from(monthMap.values());
+
+  const monthsHtml = months.map(m => {
+    const firstOfMonth = new Date(m.year, m.month, 1);
+    const daysInMonth = new Date(m.year, m.month + 1, 0).getDate();
+    const firstDow = toIsoDay(firstOfMonth.getDay()) - 1;
+
+    let cells = '';
+    for (let i = 0; i < firstDow; i++) cells += `<div class="day-cell"></div>`;
+    for (let day = 1; day <= daysInMonth; day++) {
+      const inRange = m.inRangeDays.has(day);
+      const flightData = m.flights.get(day);
+      const hasFlight = !!flightData;
+      const cls = ['day-cell'];
+      if (inRange) cls.push('in-range');
+      if (hasFlight) cls.push('has-flight');
+      const phaseStyle = hasFlight ? `style="--phase-color: ${phaseColorVar(flightData.phaseIdx)}"` : '';
+      cells += `
+        <div class="${cls.join(' ')}" ${phaseStyle}>
+          ${day}
+          ${hasFlight && flightData.freq > 1 ? `<span class="freq-badge">×${flightData.freq}</span>` : ''}
+        </div>
+      `;
+    }
+    const flightsInMonth = Array.from(m.flights.values()).reduce((s, v) => s + v.freq, 0);
+    return `
+      <div class="month">
+        <div class="month-title">
+          <span>${MONTH_NAMES[m.month]} ${m.year}</span>
+          <span class="month-title-count">${flightsInMonth} FLIGHTS</span>
+        </div>
+        <div class="month-calendar">
+          ${dowLabels.map(l => `<div class="dow-label">${l}</div>`).join('')}
+          ${cells}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="calendar-route-block">
+      <div class="calendar-route-head">
+        <span class="calc-route-badge">ROUTE ${rr.idx + 1}</span>
+        <span class="calc-route-title">
+          ${esc(fromCode)} <span style="color: var(--gold-deep)">→</span> ${esc(toCode)}
+          ${nameInline}
+        </span>
+        <span class="calc-route-count">${fmtNum(rr.totalFlights)} flights</span>
+      </div>
+      <div class="phase-legend">${legend}</div>
+      <div class="month-grid">${monthsHtml}</div>
+    </div>
+  `;
+}
+
+// ============ RESET ============
+function resetAll() {
+  state.routes = [createEmptyRoute()];
+  state.aggregate = null;
+  document.getElementById('err-msg').textContent = '';
+  document.getElementById('calc-empty').style.display = 'block';
+  document.getElementById('calc-body').style.display = 'none';
+  document.getElementById('calendar-empty').style.display = 'block';
+  document.getElementById('calendar-body').style.display = 'none';
+  renderRouteList();
+  renderResult();
+}
+
+// ============ INIT ============
+function init() {
+  const now = new Date();
+  document.getElementById('today-label').textContent = `Today · ${fmtDate(now)}`;
+
+  document.getElementById('btn-add-route').addEventListener('click', () => {
+    // Collapse existing routes and add a new expanded one for focus
+    state.routes.forEach(r => r.isExpanded = false);
+    state.routes.push(createEmptyRoute());
+    renderRouteList();
+    // Scroll new card into view
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.route-card');
+      const last = cards[cards.length - 1];
+      if (last) last.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  });
+
+  document.getElementById('btn-calc').addEventListener('click', calculate);
+  document.getElementById('btn-reset').addEventListener('click', resetAll);
+
+  document.querySelectorAll('.tab-header').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-header').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Start with one empty route
+  state.routes.push(createEmptyRoute());
+  renderRouteList();
+}
+
+init();
+</script>
+</body>
+</html>
