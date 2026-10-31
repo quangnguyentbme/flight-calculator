@@ -1224,6 +1224,130 @@ html, body {
   line-height: 1.4;
 }
 
+/* ─── EXPORT TAB ─────────────── */
+.export-controls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--rule-2);
+}
+.export-controls .field { min-width: 140px; }
+.export-dow-grid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.export-dow-btn {
+  width: 40px;
+  height: 34px;
+  border: 1px solid var(--rule);
+  background: var(--white);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--slate);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.export-dow-btn:hover { border-color: var(--ink); color: var(--ink); }
+.export-dow-btn.selected {
+  background: var(--ink);
+  color: var(--gold);
+  border-color: var(--ink);
+}
+.export-actions {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.btn-export {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--ink);
+  color: var(--cream);
+  transition: all 0.15s;
+}
+.btn-export:hover { background: var(--ink-2); }
+.btn-export:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-export.secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+.btn-export.secondary:hover { border-color: var(--ink); background: var(--cream); }
+
+.export-route-select {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.export-route-chip {
+  padding: 6px 14px;
+  border: 1px solid var(--rule);
+  background: var(--white);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--slate);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.export-route-chip:hover { border-color: var(--ink); color: var(--ink); }
+.export-route-chip.selected {
+  background: var(--ink);
+  color: var(--gold);
+  border-color: var(--ink);
+}
+
+.export-table-wrap {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+.export-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+  font-size: 13px;
+}
+.export-table th {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--ink);
+  font-size: 10px;
+  color: var(--slate);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--cream);
+  position: sticky;
+  top: 0;
+}
+.export-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--rule-2);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.export-table tr:hover td { background: var(--cream); }
+.export-table td.mono {
+  font-family: 'Fraunces', serif;
+  letter-spacing: 0.03em;
+}
+.export-count {
+  font-size: 12px;
+  color: var(--slate);
+  margin-top: 14px;
+}
+.export-count strong { color: var(--ink); font-weight: 600; }
+
 /* ─── EMPTY STATE ─────────────── */
 .empty {
   padding: 80px 32px;
@@ -1341,6 +1465,7 @@ html, body {
     <div class="tab-headers">
       <button class="tab-header active" data-tab="calc">Calculation details</button>
       <button class="tab-header" data-tab="calendar">Detailed schedule</button>
+      <button class="tab-header" data-tab="export">Export flights</button>
     </div>
 
     <div class="tab-body">
@@ -1384,6 +1509,47 @@ html, body {
             Each route displays its own schedule, color-coded by phase. The small number in the corner is the frequency per day (shown only when >1).
           </p>
           <div id="calendar-routes-container"></div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-export">
+        <div id="export-empty" class="empty">
+          <div class="empty-icon">⬇</div>
+          <div class="empty-text">Click <em>Calculate total flights</em> first, then come here to export individual flight dates</div>
+        </div>
+        <div id="export-body" style="display:none">
+          <p class="calc-intro">Select a route, date range and days of week, then preview or download the flight list as CSV.</p>
+
+          <div id="export-route-chips" class="export-route-select"></div>
+
+          <div class="export-controls">
+            <div class="field">
+              <label>Start date</label>
+              <input type="date" id="export-start">
+            </div>
+            <div class="field">
+              <label>End date</label>
+              <input type="date" id="export-end">
+            </div>
+            <div class="field">
+              <label>Days of week</label>
+              <div class="export-dow-grid" id="export-dow-grid">
+                <button class="export-dow-btn selected" data-dow="1">Mon</button>
+                <button class="export-dow-btn selected" data-dow="2">Tue</button>
+                <button class="export-dow-btn selected" data-dow="3">Wed</button>
+                <button class="export-dow-btn selected" data-dow="4">Thu</button>
+                <button class="export-dow-btn selected" data-dow="5">Fri</button>
+                <button class="export-dow-btn selected" data-dow="6">Sat</button>
+                <button class="export-dow-btn selected" data-dow="7">Sun</button>
+              </div>
+            </div>
+            <div class="export-actions">
+              <button class="btn-export" id="btn-export-preview">Preview</button>
+              <button class="btn-export secondary" id="btn-export-csv">Download CSV</button>
+            </div>
+          </div>
+
+          <div id="export-result"></div>
         </div>
       </div>
     </div>
@@ -1432,6 +1598,10 @@ function createEmptyRoute() {
     origin: '',
     destination: '',
     departFrom: 'origin',
+    flightDesig: '',
+    flightNumber: '',
+    departTime: '',
+    arriveTime: '',
     phases: [createEmptyPhase()],
     isExpanded: true,
     result: null
@@ -1605,6 +1775,30 @@ function buildRouteBody(route, routeIdx) {
         <span class="field-hint">Flight direction</span>
       </div>
     </div>
+    <div class="field-row" style="margin-top: 14px;">
+      <div class="field">
+        <label>Flight designator</label>
+        <input type="text" class="route-desig-input airport-code" maxlength="2" placeholder="9G" value="${esc(route.flightDesig)}">
+        <span class="field-hint">Airline code (e.g. 9G)</span>
+      </div>
+      <div class="field">
+        <label>Flight number</label>
+        <input type="text" class="route-fltnum-input" placeholder="221" value="${esc(route.flightNumber)}">
+        <span class="field-hint">e.g. 221</span>
+      </div>
+    </div>
+    <div class="field-row" style="margin-top: 14px;">
+      <div class="field">
+        <label>Departure time</label>
+        <input type="text" class="route-dept-input" placeholder="1810" maxlength="4" value="${esc(route.departTime)}">
+        <span class="field-hint">Local time, 24h format</span>
+      </div>
+      <div class="field">
+        <label>Arrival time</label>
+        <input type="text" class="route-arvl-input" placeholder="2355" maxlength="4" value="${esc(route.arriveTime)}">
+        <span class="field-hint">Local time, 24h format</span>
+      </div>
+    </div>
     <div class="route-preview">
       ${routePreviewInnerHTML(route)}
     </div>
@@ -1641,6 +1835,18 @@ function buildRouteBody(route, routeIdx) {
     updateRoutePreviewInPlace(infoSection, route);
     updateRouteHeaderInPlace(route, routeIdx);
   });
+
+  const desigInput = infoSection.querySelector('.route-desig-input');
+  desigInput.addEventListener('input', (e) => {
+    route.flightDesig = e.target.value.toUpperCase();
+    e.target.value = route.flightDesig;
+  });
+  const fltnumInput = infoSection.querySelector('.route-fltnum-input');
+  fltnumInput.addEventListener('input', (e) => { route.flightNumber = e.target.value; });
+  const deptInput = infoSection.querySelector('.route-dept-input');
+  deptInput.addEventListener('input', (e) => { route.departTime = e.target.value; });
+  const arvlInput = infoSection.querySelector('.route-arvl-input');
+  arvlInput.addEventListener('input', (e) => { route.arriveTime = e.target.value; });
 
   wrapper.appendChild(infoSection);
 
@@ -1997,6 +2203,7 @@ function renderResult() {
 
   renderCalcTab();
   renderCalendarTab();
+  showExportTab();
 }
 
 // ============ CALC TAB ============
@@ -2253,8 +2460,208 @@ function resetAll() {
   document.getElementById('calc-body').style.display = 'none';
   document.getElementById('calendar-empty').style.display = 'block';
   document.getElementById('calendar-body').style.display = 'none';
+  document.getElementById('export-empty').style.display = 'block';
+  document.getElementById('export-body').style.display = 'none';
+  document.getElementById('export-result').innerHTML = '';
+  document.getElementById('export-start').value = '';
+  document.getElementById('export-end').value = '';
   renderRouteList();
   renderResult();
+}
+
+// ============ EXPORT ============
+const exportState = { selectedRouteIdx: 0, selectedDows: new Set([1,2,3,4,5,6,7]) };
+
+function initExportTab() {
+  // DOW toggles
+  document.querySelectorAll('#export-dow-grid .export-dow-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = +btn.dataset.dow;
+      if (exportState.selectedDows.has(d)) {
+        if (exportState.selectedDows.size > 1) {
+          exportState.selectedDows.delete(d);
+          btn.classList.remove('selected');
+        }
+      } else {
+        exportState.selectedDows.add(d);
+        btn.classList.add('selected');
+      }
+    });
+  });
+
+  document.getElementById('btn-export-preview').addEventListener('click', () => renderExportTable(false));
+  document.getElementById('btn-export-csv').addEventListener('click', () => renderExportTable(true));
+}
+
+function renderExportRouteChips() {
+  const a = state.aggregate;
+  if (!a) return;
+  const container = document.getElementById('export-route-chips');
+  container.innerHTML = a.routeResults.map((rr, i) => {
+    const r = rr.route;
+    const fromCode = r.departFrom === 'origin' ? r.origin : r.destination;
+    const toCode = r.departFrom === 'origin' ? r.destination : r.origin;
+    const sel = i === exportState.selectedRouteIdx ? ' selected' : '';
+    return `<button class="export-route-chip${sel}" data-ridx="${i}">${fromCode} → ${toCode}${r.name ? ' · ' + esc(r.name) : ''}</button>`;
+  }).join('');
+
+  container.querySelectorAll('.export-route-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      exportState.selectedRouteIdx = +chip.dataset.ridx;
+      container.querySelectorAll('.export-route-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      // Auto-fill date range from route
+      fillExportDates();
+    });
+  });
+
+  fillExportDates();
+}
+
+function fillExportDates() {
+  const a = state.aggregate;
+  if (!a || !a.routeResults[exportState.selectedRouteIdx]) return;
+  const rr = a.routeResults[exportState.selectedRouteIdx];
+  const startEl = document.getElementById('export-start');
+  const endEl = document.getElementById('export-end');
+  if (!startEl.value) startEl.value = rr.route.phases[0]?.startDate || '';
+  if (!endEl.value) {
+    const lastPhase = rr.route.phases[rr.route.phases.length - 1];
+    endEl.value = lastPhase?.endDate || '';
+  }
+}
+
+function buildExportRows() {
+  const a = state.aggregate;
+  if (!a) return [];
+  const rr = a.routeResults[exportState.selectedRouteIdx];
+  if (!rr) return [];
+
+  const r = rr.route;
+  const startStr = document.getElementById('export-start').value;
+  const endStr = document.getElementById('export-end').value;
+  if (!startStr || !endStr) return [];
+
+  const filterStart = new Date(startStr + 'T00:00:00');
+  const filterEnd = new Date(endStr + 'T00:00:00');
+
+  const fromCode = r.departFrom === 'origin' ? r.origin : r.destination;
+  const toCode = r.departFrom === 'origin' ? r.destination : r.origin;
+  const market = fromCode + toCode;
+  const flt = (r.flightDesig ? r.flightDesig + ' ' : '') + r.flightNumber;
+  const dept = r.departTime ? "'" + r.departTime : '';
+  const arvl = r.arriveTime ? "'" + r.arriveTime : '';
+
+  const rows = [];
+
+  // Iterate each phase, each day in the date range
+  rr.phaseResults.forEach(pr => {
+    const phaseStart = new Date(Math.max(pr.start.getTime(), filterStart.getTime()));
+    const phaseEnd = new Date(Math.min(pr.end.getTime(), filterEnd.getTime()));
+    if (phaseStart > phaseEnd) return;
+
+    const cursor = new Date(phaseStart);
+    while (cursor <= phaseEnd) {
+      const iso = toIsoDay(cursor.getDay());
+      if (pr.phase.days[iso] !== null && exportState.selectedDows.has(iso)) {
+        const freq = pr.phase.days[iso];
+        for (let f = 0; f < freq; f++) {
+          rows.push({
+            date: new Date(cursor),
+            month: cursor.getMonth() + 1,
+            dow: iso,
+            market,
+            flt,
+            desig: r.flightDesig || '',
+            dept,
+            arvl
+          });
+        }
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  });
+
+  // Sort by date
+  rows.sort((a, b) => a.date - b.date);
+  return rows;
+}
+
+function fmtExportDate(d) {
+  const day = d.getDate();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${day}-${months[d.getMonth()]}-${d.getFullYear()}`;
+}
+
+function renderExportTable(downloadCsv) {
+  const rows = buildExportRows();
+  const resultEl = document.getElementById('export-result');
+
+  if (rows.length === 0) {
+    resultEl.innerHTML = '<p style="color: var(--danger); font-style: italic; font-size: 13px;">No flights found for the selected filters. Check date range and DOW selection.</p>';
+    return;
+  }
+
+  if (downloadCsv) {
+    const header = 'DATE,MONTH,DOW,MARKET,FLT,DESIG,DEPT,ARVL';
+    const csvRows = rows.map(r =>
+      `${fmtExportDate(r.date)},${r.month},${r.dow},${r.market},${r.flt},${r.desig},${r.dept},${r.arvl}`
+    );
+    const csv = [header, ...csvRows].join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `flights_export_${rows[0].market}_${document.getElementById('export-start').value}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
+
+  // Preview table
+  const tableRows = rows.map((r, i) => `
+    <tr>
+      <td class="mono">${i + 1}</td>
+      <td>${fmtExportDate(r.date)}</td>
+      <td>${r.month}</td>
+      <td>${r.dow}</td>
+      <td class="mono">${esc(r.market)}</td>
+      <td>${esc(r.flt)}</td>
+      <td>${esc(r.desig)}</td>
+      <td class="mono">${esc(r.dept)}</td>
+      <td class="mono">${esc(r.arvl)}</td>
+    </tr>
+  `).join('');
+
+  resultEl.innerHTML = `
+    <div class="export-table-wrap">
+      <table class="export-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Month</th>
+            <th>DOW</th>
+            <th>Market</th>
+            <th>FLT</th>
+            <th>Desig</th>
+            <th>Dept</th>
+            <th>Arvl</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+    <div class="export-count"><strong>${fmtNum(rows.length)}</strong> flights · ${fmtExportDate(rows[0].date)} → ${fmtExportDate(rows[rows.length - 1].date)}</div>
+  `;
+}
+
+function showExportTab() {
+  const a = state.aggregate;
+  if (!a) return;
+  document.getElementById('export-empty').style.display = 'none';
+  document.getElementById('export-body').style.display = 'block';
+  renderExportRouteChips();
 }
 
 // ============ INIT ============
@@ -2286,6 +2693,8 @@ function init() {
       document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     });
   });
+
+  initExportTab();
 
   // Start with one empty route
   state.routes.push(createEmptyRoute());
